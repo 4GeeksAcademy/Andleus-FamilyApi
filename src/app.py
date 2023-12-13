@@ -34,9 +34,59 @@ def handle_hello():
         "hello": "world",
         "family": members
     }
-
-
     return jsonify(response_body), 200
+
+
+@app.route('/members', methods=['GET', 'POST'])
+def hanlde_members():
+    if request.method == 'GET':
+        members = jackson_family.get_all_members()
+        response_body = {"hello": "world",
+                         "family": members}
+        return response_body, 200
+    if request.method == 'POST':
+        data = request.json
+        response_body = {}
+        print(data)
+        jackson_family.add_member(data)
+        members = jackson_family.get_all_members()
+        response_body["message"] = "Add it!"
+        response_body["results"] = members
+        return response_body, 200
+
+@app.route('/members/<int:id_member>', methods=["GET", "PUT", "DELETE"])
+def handle_member(id_member):
+    response_body = {}
+    if request.method == "GET":
+        member = jackson_family.get_member(id_member)
+        if member:
+            response_body['message'] = 'Found it!'
+            response_body['results'] = member
+            return response_body, 200
+        response_body = {'message': 'Cant be found it...',
+                             'results': []}
+        return response_body, 404
+    if request.method == "DELETE":
+        member = jackson_family.delete_member(id_member)
+        if member:
+            response_body['message'] = 'Delete it!'
+            response_body['results'] = "Deleteado"
+            return response_body, 200
+        response_body = {'message': 'Cant be delete it...',
+                        'results': []}
+        return response_body, 404
+
+    data = request.json
+    response_body = {}
+    print(data)
+    jackson_family.add_member(data)
+    members = jackson_family.get_all_members()
+    response_body["message"] = "Add it!"
+    response_body["results"] = members
+    return response_body, 200
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
